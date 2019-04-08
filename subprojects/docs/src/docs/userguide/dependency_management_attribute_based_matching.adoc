@@ -207,6 +207,26 @@ include::sample[dir="userguide/dependencyManagement/artifactTransforms/relocate/
 include::sample[dir="userguide/dependencyManagement/artifactTransforms/relocate/kotlin",files="build.gradle.kts[tags=artifact-transform-registration]"]
 ====
 
+=== Artifact Transform Selection
+
+Depending on the producer attributes and the consumer attributes Gradle decides which transforms need to be executed on a given artifact.
+It starts with the requested attributes and then considers all transforms which modify some of the requested attributes as possible paths to lead there.
+Going backwards, Gradle tries to obtain a path to some producer variant using transforms
+Of all the found transform chains, Gradle tries to select the best one:
+- If there is only one transform chain, it is selected.
+- If there are two transform chains, and one is a suffix of the other one, it is selected.
+- If there is a shortest transform chain, then it is selected.
+- In all other cases, the selection fails and an error is reported.
+
+Note that artifact transforms are not considered when there is already a producer variant matching the requested attributes.
+
+[[NOTE]]
+---
+The `artifactType` attribute is special, since it is only present on artifacts and not on modules.
+As a consequence, any transform which is only mutating `artifactType` will never be selected when transforming between configurations with different consumer and producer attributes.
+It will only be considered when using an link:{javadocPath}/org/gradle/api/artifacts/ArtifactView.html[ArtifactView].
+---
+
 === Implementing Artifact Transforms
 
 Similar to tasks, an artifact transform consists of an action and some parameters.
